@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>분수 퍼즐 지우기 (8·16·25조각)</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --accent:#ff6b9e;   /* 귀여운 핑크 */
+    --accent2:#7dd3fc;  /* 하늘 포인트 */
+    --tile:#222;        /* 퍼즐판 색 (배경 완전 가림) */
+    --tileText:#fff;
+    --ok:#22c55e;
+    --bad:#f97316;
+  }
+  html,body{height:100%;margin:0;background:linear-gradient(135deg,#0ea5e9 0%,#f9a8d4 100%) fixed;font-family:"Jua",system-ui,"Noto Sans KR",sans-serif;color:#fff}
+  .app{display:flex;flex-direction:column;height:100vh;gap:10px;padding:12px}
+  header{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  header h1{font-size:clamp(18px,4.5vw,28px);margin:0 8px 0 0; text-shadow:0 3px 0 #0003}
+  .stageButtons{display:flex;gap:8px;flex-wrap:wrap}
+  .pill{
+    background:#00000028; border:1px solid #ffffff33; padding:8px 12px; border-radius:999px; font-weight:700; backdrop-filter:blur(6px)
+  }
+  button{
+    background:var(--accent); color:#fff; border:none; padding:10px 16px; border-radius:14px;
+    font-weight:900; box-shadow:0 8px 18px #0004; cursor:pointer; transform:translateZ(0);
+    transition:transform .06s ease, filter .06s ease;
+  }
+  button:active{transform:translateY(2px) scale(.98); filter:brightness(.95)}
+  button.secondary{background:#00000028; border:1px solid #ffffff35}
+  .hud{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .boardWrap{position:relative;flex:1;min-height:280px;border-radius:18px;overflow:hidden;background:#000;box-shadow:0 12px 30px #0005}
+  .boardBg{position:absolute; inset:0; background:#000 center/cover no-repeat; filter:saturate(1); transform:translateZ(0)}
+  .tiles{position:absolute; inset:0;}
+  .tile{
+    position:absolute; display:flex; align-items:center; justify-content:center;
+    background:var(--tile); color:var(--tileText);
+    border:0; border-radius:14px; user-select:none; -webkit-user-select:none;
+    font-size:clamp(16px,3.6vw,34px); font-weight:900; letter-spacing:.2px;
+    /* 배경이 절대 새어보이지 않도록 살짝 겹치게 */
+    box-shadow:0 0 0 .6px #000 inset, 0 0 0 1px #000;
+    transition:opacity .22s ease, transform .2s ease, filter .2s ease, background .2s ease;
+  }
+  .tile small{opacity:.95; transform:translateY(-1px)}
+  .tile.hint{outline:3px dashed #fff8; outline-offset:-4px; animation:hint 1s infinite}
+  @keyframes hint{0%,100%{filter:none}50%{filter:brightness(1.3)}}
+  .tile.solved{opacity:0; pointer-events:none; transform:scale(.96)}
+
+  .tray{
+    position:relative; min-height:130px; border-radius:18px; background:#00000028;
+    border:1px solid #ffffff33; padding:12px; overflow:hidden; backdrop-filter:blur(8px);
+    box-shadow:inset 0 0 0 1px #ffffff1a;
+  }
+  .heartsArea{position:relative; min-height:100px}
+  .heart{
+    position:absolute; width:170px; min-width:140px; padding:16px 18px 20px;
+    text-align:center; color:#fff; cursor:grab; touch-action:none;
+    transform:translate(-50%,-50%); will-change:transform;
+    filter:drop-shadow(0 10px 14px #0005);
+    transition:transform .12s ease, opacity .2s ease;
+    animation:float 3s ease-in-out infinite;
+  }
+  .heart.grabbing{cursor:grabbing; transform:translate(-50%,-50%) scale(1.06) rotate(-1.5deg)}
+  @keyframes float{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-6px)}}
+  /* 하트 모양 */
+  .heart::before, .heart::after{
+    content:""; position:absolute; width:64%; height:64%; left:18%; top:18%;
+    background:var(--accent); border-radius:50% 50% 0 0; transform:rotate(-45deg);
+    box-shadow:0 10px 24px #ff6b9e66, inset 0 -8px 16px #0003;
+  }
+  .heart::after{left:auto; right:18%; transform:rotate(45deg)}
+  .heart > span{
+    position:relative; z-index:2; display:inline-block;
+    padding:10px 12px; border-radius:12px; background:#0007; box-shadow:0 3px 10px #0007;
+    font-size:clamp(18px,4.2vw,36px); font-weight:900; white-space:nowrap;
+  }
+  .heart.bad{animation:shake .28s}
+  @keyframes shake{0%{transform:translate(-50%,-50%) rotate(0)}25%{transform:translate(calc(-50% - 7px),-50%) rotate(-3deg)}75%{transform:translate(calc(-50% + 7px),-50%) rotate(3deg)}100%{transform:translate(-50%,-50%) rotate(0)}}
+  .lives{
+    position:absolute; z-index:3; left:50%; top:100%; transform:translate(-50%,-6px);
+    display:flex; gap:6px; padding:4px 8px; border-radius:999px; background:#0007; font-size:14px
+  }
+  .lifeDot{width:10px; height:10px; border-radius:50%; background:#fff9; box-shadow:0 0 0 2px #0004 inset}
+  .lifeDot.off{background:#0002}
+
+  .footerBar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:8px}
+  .progress{font-weight:900}
+  .legend{opacity:.95}
+  .toast{
+    position:fixed; left:50%; bottom:16px; transform:translateX(-50%);
+    background:#000000cc; border:1px solid #ffffff33; color:#fff; padding:10px 14px; border-radius:12px;
+    box-shadow:0 10px 30px #0006; display:none; font-weight:800
+  }
+  .toast.show{display:block; animation:fade .18s}
+  @keyframes fade{from{opacity:0; transform:translateX(-50%) translateY(8px)} to{opacity:1; transform:translateX(-50%) translateY(0)}}
+
+  /* 작은 반짝이 */
+  .spark{position:absolute; pointer-events:none; font-size:22px; animation:spark 800ms ease forwards}
+  @keyframes spark{0%{opacity:0; transform:translateY(10px) scale(.6)}30%{opacity:1}100%{opacity:0; transform:translateY(-30px) scale(1.2)}}
+
+  @media (max-width:768px){
+    .heart{width:150px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>분수 퍼즐 지우기</h1>
+    <div class="stageButtons">
+      <button class="pill stageBtn" data-stage="1">1단계 · 8조각</button>
+      <button class="pill stageBtn" data-stage="2">2단계 · 16조각</button>
+      <button class="pill stageBtn" data-stage="3">3단계 · 25조각</button>
+    </div>
+    <div class="hud">
+      <button id="reloadBg" class="secondary pill">배경 새로고침</button>
+      <div class="pill" id="progress">완료 0/0</div>
+    </div>
+  </header>
+
+  <div class="boardWrap" id="boardWrap">
+    <!-- 배경은 타일 아래에만 있고, 타일이 완전히 덮어 가린다 -->
+    <div class="boardBg" id="boardBg"></div>
+    <div class="tiles" id="tiles"></div>
+  </div>
+
+  <div class="tray">
+    <div class="heartsArea" id="heartsArea"></div>
+    <div class="footerBar">
+      <div class="legend">하트를 정답 타일 위로 끌어두면 그 조각이 “툭” 사라지며 그림이 보여요. (오답 3번 → 해당 하트 사라짐)</div>
+      <div>
+        <button id="shuffleBtn" class="secondary">하트 섞기</button>
+        <button id="resetBtn">처음부터</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* -------------------- 단계별 문제 세트 -------------------- */
+const STAGES = {
+  1: { rows:2, cols:4, // 8조각
+       pairs: [
+        {q:"2/5 + 2/5", a:"4/5"},
+        {q:"5/6 + 3/6", a:"1 1/3"},
+        {q:"1 1/9 + 1 3/9", a:"2 4/9"},
+        {q:"3/5 - 1/5", a:"2/5"},
+        {q:"8 4/5 - 6 2/5", a:"2 2/5"},
+        {q:"2 - 5/9", a:"1 4/9"},
+        {q:"2/8 + 5/8", a:"7/8"},
+        {q:"7/9 + 3/9", a:"1 1/9"},
+       ]
+     },
+  2: { rows:4, cols:4, // 16조각
+       pairs: [
+        {q:"3 1/8 + 3 2/8", a:"6 3/8"},
+        {q:"6/7 - 4/7", a:"2/7"},
+        {q:"9 4/8 - 5 3/8", a:"4 1/8"},
+        {q:"9 - 3/4", a:"8 1/4"},
+        {q:"1/4 + 2/4", a:"3/4"},
+        {q:"5 5/7 + 3 4/7", a:"9 2/7"},
+        {q:"3/7 - 2/7", a:"1/7"},
+        {q:"3 6/8 - 1 5/8", a:"2 1/8"},
+        {q:"8 - 3/4", a:"7 1/4"},
+        {q:"1/9 + 6/9", a:"7/9"},
+        {q:"4/5 + 3/5", a:"1 2/5"},
+        {q:"7/10 + 1/10", a:"4/5"},
+        {q:"11/12 - 5/12", a:"1/2"},
+        {q:"2 3/8 + 1 1/8", a:"3 1/2"},
+        {q:"4/9 + 2/9", a:"2/3"},
+        {q:"2 5/6 - 1 1/6", a:"1 2/3"},
+       ]
+     },
+  3: { rows:5, cols:5, // 25조각
+       pairs: [
+        {q:"2/3 + 1/3", a:"1"},
+        {q:"7/8 - 3/8", a:"1/2"},
+        {q:"5/9 + 2/9", a:"7/9"},
+        {q:"4/7 + 2/7", a:"6/7"},
+        {q:"6/11 + 3/11", a:"9/11"},
+        {q:"3 1/4 + 2 2/4", a:"5 3/4"},
+        {q:"4 3/5 - 2 1/5", a:"2 2/5"},
+        {q:"6 7/10 - 1 3/10", a:"5 2/5"},
+        {q:"2 4/9 + 1 2/9", a:"3 2/3"},
+        {q:"1/6 + 3/6", a:"2/3"},
+        {q:"5/6 - 3/6", a:"1/3"},
+        {q:"3/10 + 5/10", a:"4/5"},
+        {q:"9/10 - 2/10", a:"7/10"},
+        {q:"1 1/8 + 2 5/8", a:"3 3/4"},
+        {q:"4 7/8 - 2 1/8", a:"2 3/4"},
+        {q:"5/14 + 4/14", a:"9/14"},
+        {q:"9/8 - 3/8", a:"3/4"},
+        {q:"1 2/3 + 5/6", a:"2 1/2"},
+        {q:"3/8 + 2/8", a:"5/8"},
+        {q:"7/15 + 4/15", a:"11/15"},
+        {q:"7/18 + 6/18", a:"13/18"},
+        {q:"2 2/3 + 1 2/3", a:"4 1/3"},
+        {q:"2 1/3 + 2/3", a:"3"},
+        {q:"2 5/6 + 3 1/3", a:"6 1/6"},
+        {q:"1 1/2 + 1 3/8", a:"2 7/8"},
+       ]
+     }
+};
+
+/* -------------------- 전역 상태 -------------------- */
+let currentStage = 1;
+let solvedCount = 0;
+let hearts = [];  // DOM refs
+let tiles = [];   // DOM refs
+
+/* 자산 폴더 배경: 파일명을 고정으로 사용 */
+const stageImages = {
+  1: 'asset/stage1.png',
+  2: 'asset/stage2.png',
+  3: 'asset/stage3.png'
+};
+
+/* -------------------- 유틸 -------------------- */
+const $ = (sel, el=document) => el.querySelector(sel);
+const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._id); t._id = setTimeout(()=>t.classList.remove('show'), 1300);
+}
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){const j=(Math.random()*(i+1))|0; [arr[i],arr[j]]=[arr[j],arr[i]];} return arr; }
+function sparkAt(x,y,text='✨'){
+  const s = document.createElement('div');
+  s.className='spark'; s.textContent=text;
+  s.style.left = x+'px'; s.style.top = y+'px';
+  document.body.appendChild(s);
+  setTimeout(()=>s.remove(), 820);
+}
+
+/* -------------------- 스테이지 빌드 -------------------- */
+function setBoardBg(url){
+  $('#boardBg').style.backgroundImage = url ? `url(${url})` : 'none';
+}
+function buildStage(stageId){
+  currentStage = stageId;
+  const stage = STAGES[stageId];
+  const pairs = stage.pairs.slice();
+  solvedCount = 0;
+  $('#progress').textContent = `완료 ${solvedCount}/${Math.min(stage.rows*stage.cols, pairs.length)}`;
+
+  // 배경 적용 (타일 아래, 처음엔 전부 가려짐)
+  setBoardBg(stageImages[stageId] || '');
+
+  // 리셋
+  $('#tiles').innerHTML = '';
+  $('#heartsArea').innerHTML = '';
+  hearts = []; tiles = [];
+
+  // 퍼즐 타일 생성 (그리드 전부 가려 퍼즐 시작 시 그림이 전혀 안 보임)
+  const r = stage.rows, c = stage.cols;
+  const total = r*c;
+  const useN = Math.min(total, pairs.length);
+  const picked = pairs.slice(0, useN);
+
+  const tilesEl = $('#tiles');
+  for(let i=0;i<useN;i++){
+    const row = Math.floor(i / c);
+    const col = i % c;
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    tile.dataset.answer = picked[i].a;
+    tile.innerHTML = `<small>${picked[i].a}</small>`;
+
+    // 정확히 덮도록 % 배치 (틈 방지 위해 음수 margin 없이 100% 꽉 채움)
+    const w = 100/c, h = 100/r;
+    tile.style.left = `${col*w}%`;
+    tile.style.top  = `${row*h}%`;
+    tile.style.width = `${w}%`;
+    tile.style.height= `${h}%`;
+
+    tilesEl.appendChild(tile);
+    tiles.push(tile);
+  }
+
+  // 하트(문제) 생성 — 랜덤 배치
+  const heartsArea = $('#heartsArea');
+  const areaRect = heartsArea.getBoundingClientRect();
+  const cx = areaRect.width  || heartsArea.clientWidth;
+  const cy = areaRect.height || heartsArea.clientHeight;
+
+  shuffle(picked).forEach((p)=>{
+    const heart = document.createElement('div');
+    heart.className = 'heart';
+    heart.dataset.answer = p.a;
+    heart.dataset.wrong = '0'; // 오답 횟수
+    heart.innerHTML = `<span>${p.q}</span>`;
+    // 목숨 UI
+    const lives = document.createElement('div');
+    lives.className = 'lives';
+    lives.innerHTML = `<div class="lifeDot"></div><div class="lifeDot"></div><div class="lifeDot"></div>`;
+    heart.appendChild(lives);
+
+    // 랜덤 시작 위치
+    const x = (30 + Math.random()*(cx-60))|0;
+    const y = (30 + Math.random()*(cy-60))|0;
+    heart.style.left = x+'px';
+    heart.style.top  = y+'px';
+    heart.dataset.homeX = x; heart.dataset.homeY = y;
+    heartsArea.appendChild(heart);
+    makeDraggable(heart);
+    hearts.push(heart);
+  });
+
+  toast(`${stageId}단계 시작! 조각 ${useN}개`);
+}
+
+/* -------------------- 드래그/드롭 -------------------- */
+function updateLives(heartEl){
+  const wrong = +heartEl.dataset.wrong;
+  const dots = $$('.lifeDot', heartEl);
+  dots.forEach((d,i)=> d.classList.toggle('off', i < wrong));
+}
+function makeDraggable(el){
+  let dragging=false;
+
+  const onDown = (e)=>{
+    dragging=true; el.classList.add('grabbing');
+    el.setPointerCapture(e.pointerId);
+  };
+  const onMove = (e)=>{
+    if(!dragging) return;
+    const area = $('#heartsArea').getBoundingClientRect();
+    const x = e.clientX - area.left;
+    const y = e.clientY - area.top;
+    el.style.left = x+'px';
+    el.style.top  = y+'px';
+
+    const hit = tileHit(el);
+    tiles.forEach(t=>t.classList.remove('hint'));
+    if(hit) hit.classList.add('hint');
+  };
+  const onUp = (e)=>{
+    if(!dragging) return;
+    dragging=false; el.classList.remove('grabbing');
+    const hit = tileHit(el);
+    tiles.forEach(t=>t.classList.remove('hint'));
+
+    if(hit){
+      // 정답?
+      const ok = (hit.dataset.answer.trim() === el.dataset.answer.trim());
+      if(ok){
+        // 퍼즐 조각 제거 + 스파크
+        const r = hit.getBoundingClientRect();
+        hit.classList.add('solved');
+        sparkAt(r.left + r.width/2, r.top + r.height/2, '💖');
+
+        el.remove(); // 하트 제거
+        solvedCount++; $('#progress').textContent = `완료 ${solvedCount}/${tiles.length}`;
+        // 남은 타일이 더 귀엽게 반짝
+        tiles.forEach(t=>!t.classList.contains('solved') && (t.style.background = '#2a2a2a'));
+
+        if(solvedCount===tiles.length){
+          toast('모두 성공! 그림이 완전히 보였어요 ✨');
+          celebratoryBurst();
+        }else{
+          toast('정답! 조각이 사라졌어요');
+        }
+        return;
+      }else{
+        // 오답 처리 (3회 누적 시 하트 소멸)
+        let wrong = (+el.dataset.wrong)||0;
+        wrong++; el.dataset.wrong = String(wrong);
+        updateLives(el);
+        el.classList.add('bad'); setTimeout(()=>el.classList.remove('bad'), 260);
+        toast(wrong>=3 ? '기회 소진! 해당 문제는 사라졌어요' : `다른 자리예요 (오답 ${wrong}/3)`);
+
+        if(wrong>=3){
+          sparkAt(e.clientX, e.clientY, '💨');
+          el.style.opacity = '0'; setTimeout(()=>el.remove(), 180);
+          return;
+        }
+      }
+    }
+    // 원위치
+    el.style.left = el.dataset.homeX+'px';
+    el.style.top  = el.dataset.homeY+'px';
+  };
+
+  el.addEventListener('pointerdown', onDown);
+  el.addEventListener('pointermove', onMove);
+  el.addEventListener('pointerup', onUp);
+  el.addEventListener('pointercancel', onUp);
+}
+function tileHit(heartEl){
+  const tilesLeft = tiles.filter(t=>!t.classList.contains('solved'));
+  const hRect = heartEl.getBoundingClientRect();
+  const hcx = hRect.left + hRect.width/2;
+  const hcy = hRect.top  + hRect.height/2;
+  for(const t of tilesLeft){
+    const r = t.getBoundingClientRect();
+    if(hcx>=r.left && hcx<=r.right && hcy>=r.top && hcy<=r.bottom){
+      return t;
+    }
+  }
+  return null;
+}
+
+/* 축하 이펙트 간단 버스트 */
+function celebratoryBurst(){
+  const rect = $('#boardWrap').getBoundingClientRect();
+  for(let i=0;i<24;i++){
+    const x = rect.left + Math.random()*rect.width;
+    const y = rect.top + rect.height*0.3 + Math.random()*rect.height*0.4;
+    setTimeout(()=>sparkAt(x,y, Math.random()<.5?'✨':'💫'), Math.random()*500);
+  }
+}
+
+/* -------------------- UI 바인딩 -------------------- */
+$('.stageButtons').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.stageBtn'); if(!btn) return;
+  buildStage(+btn.dataset.stage);
+});
+
+$('#shuffleBtn').addEventListener('click', ()=>{
+  const area = $('#heartsArea');
+  const rect = area.getBoundingClientRect(); const cx = rect.width; const cy = rect.height;
+  hearts.forEach(h=>{
+    const x = (30 + Math.random()*(cx-60))|0;
+    const y = (30 + Math.random()*(cy-60))|0;
+    h.style.left = x+'px'; h.style.top = y+'px';
+    h.dataset.homeX = x; h.dataset.homeY = y;
+  });
+  toast('하트를 섞었어요');
+});
+
+$('#resetBtn').addEventListener('click', ()=> buildStage(currentStage));
+
+/* 자산 폴더 새로고침(파일 교체 후 새로고침 없이 다시 로드하고 싶을 때) */
+$('#reloadBg').addEventListener('click', ()=>{
+  // cache busting 쿼리 붙여서 새로고침 효과
+  const t = Date.now();
+  Object.keys(stageImages).forEach(k=>{
+    const base = stageImages[k].split('?')[0];
+    stageImages[k] = `${base}?v=${t}`;
+  });
+  setBoardBg(stageImages[currentStage]);
+  toast('배경을 새로고침했어요');
+});
+
+/* 초기 진입 */
+buildStage(1);
+</script>
+</body>
+</html>
