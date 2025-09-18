@@ -18,7 +18,7 @@
   html,body{height:100%;margin:0;background:linear-gradient(135deg,#0ea5e9 0%,#f9a8d4 100%) fixed;font-family:"Jua",system-ui,"Noto Sans KR",sans-serif;color:#fff}
   .app{display:flex;flex-direction:column;height:100vh;gap:10px;padding:12px}
   header{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  header h1{font-size:clamp(20px,5.4vw,34px);margin:0 8px 0 0; text-shadow:0 3px 0 #0003}
+  header h1{font-size:clamp(20px,5.2vw,34px);margin:0 8px 0 0; text-shadow:0 3px 0 #0003}
   .stageButtons{display:flex;gap:8px;flex-wrap:wrap}
   .pill{
     background:#00000028; border:1px solid #ffffff33; padding:10px 14px; border-radius:999px; font-weight:900; backdrop-filter:blur(6px)
@@ -31,6 +31,7 @@
   button:active{transform:translateY(2px) scale(.98); filter:brightness(.95)}
   button.secondary{background:#00000028; border:1px solid #ffffff35}
   .hud{margin-left:auto;display:flex;gap:8px;align-items:center}
+
   .boardWrap{position:relative;flex:1;min-height:300px;border-radius:18px;overflow:hidden;background:#000;box-shadow:0 12px 30px #0005}
   .boardBg{position:absolute; inset:0; background:#000 center/cover no-repeat; filter:saturate(1); transform:translateZ(0)}
   .tiles{position:absolute; inset:0;}
@@ -61,6 +62,12 @@
     transition:transform .12s ease, opacity .2s ease, left .15s ease, top .15s ease;
     animation:float 3s ease-in-out infinite;
   }
+  /* 3단계만 살짝 더 작게 */
+  .heart.compact{ width:150px; min-width:126px; }
+  .heart.compact > span{ font-size:clamp(18px,4.2vw,32px); }
+  .heart.compact .lives{ font-size:12px; transform:translate(-50%,-5px); }
+  .heart.compact .lifeDot{ width:8px; height:8px; }
+
   .heart.grabbing{cursor:grabbing; transform:translate(-50%,-50%) scale(1.06) rotate(-1.5deg)}
   @keyframes float{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-6px)}}
   /* 하트 모양 */
@@ -127,7 +134,7 @@
   <div class="tray">
     <div class="heartsArea" id="heartsArea"></div>
     <div class="footerBar">
-      <div class="legend">하트를 정답 타일 위로 끌어두면 그 조각이 “툭” 사라지며 그림이 보여요. (오답 3번 → 해당 하트 사라짐)</div>
+      <div class="legend">하트를 드래그해 트레이에서 자유롭게 배치할 수 있어요. 정답 타일에 얹으면 조각이 사라집니다. (오답 3번 → 해당 하트 사라짐)</div>
       <div>
         <button id="shuffleBtn" class="secondary">하트 섞기</button>
         <button id="resetBtn">처음부터</button>
@@ -141,8 +148,8 @@
 <script>
 /* -------------------- 단계별 문제 세트 --------------------
    - 1단계: 통분/약분 불필요(기본)
-   - 2·3단계: 덧셈은 '올림', 뺄셈은 '빌림'이 반드시 나오도록 구성
-   - 모든 분모는 통분이 필요 없도록 동일하게 제시
+   - 2·3단계: 덧셈은 '올림', 뺄셈은 '빌림' 반드시 포함
+   - 모든 분모는 통분 불필요하도록 동일
 ------------------------------------------------------------ */
 const STAGES = {
   1: { rows:2, cols:4, // 8조각
@@ -177,7 +184,7 @@ const STAGES = {
         {q:"6 2/7 - 4 6/7", a:"1 3/7"},   // 빌림
        ]
      },
-  3: { rows:5, cols:5, // 25조각 — 올림/빌림 포함
+  3: { rows:5, cols:5, // 25조각 — 올림/빌림 포함 (하트 compact)
        pairs: [
         {q:"3 4/7 + 2 6/7", a:"6 3/7"},   // 올림
         {q:"5 2/11 - 2 8/11", a:"2 5/11"},// 빌림
@@ -237,8 +244,9 @@ function sparkAt(x,y,text='✨'){
   document.body.appendChild(s);
   setTimeout(()=>s.remove(), 820);
 }
+const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 
-/* 하트 겹침 방지 레이아웃 (반응형 그리드) */
+/* 하트 겹침 방지 레이아웃 (초기/섞기용), 이후에는 자유 배치 */
 function layoutHeartsNoOverlap(jitter=true){
   const area = $('#heartsArea');
   const rect = area.getBoundingClientRect();
@@ -316,8 +324,11 @@ function buildStage(stageId){
   shuffle(picked).forEach((p)=>{
     const heart = document.createElement('div');
     heart.className = 'heart';
+    if(stageId===3) heart.classList.add('compact'); // 3단계만 작게
     heart.dataset.answer = p.a;
     heart.dataset.wrong = '0'; // 오답 횟수
+    heart.dataset.lastX = '0';
+    heart.dataset.lastY = '0';
     heart.innerHTML = `<span>${p.q}</span>`;
     // 목숨 UI
     const lives = document.createElement('div');
@@ -326,7 +337,7 @@ function buildStage(stageId){
     heart.appendChild(lives);
 
     heartsArea.appendChild(heart);
-    makeDraggable(heart);
+    makeDraggable(heart, heartsArea);
     hearts.push(heart);
   });
 
@@ -342,7 +353,7 @@ function updateLives(heartEl){
   const dots = $$('.lifeDot', heartEl);
   dots.forEach((d,i)=> d.classList.toggle('off', i < wrong));
 }
-function makeDraggable(el){
+function makeDraggable(el, container){
   let dragging=false;
 
   const onDown = (e)=>{
@@ -351,11 +362,14 @@ function makeDraggable(el){
   };
   const onMove = (e)=>{
     if(!dragging) return;
-    const area = $('#heartsArea').getBoundingClientRect();
-    const x = e.clientX - area.left;
-    const y = e.clientY - area.top;
+    const area = container.getBoundingClientRect();
+    // 컨테이너 내부로만 이동 (가드 여백 20px)
+    const x = clamp(e.clientX - area.left, 20, (area.width - 20));
+    const y = clamp(e.clientY - area.top,  20, (area.height - 20));
     el.style.left = x+'px';
     el.style.top  = y+'px';
+    el.dataset.lastX = String(x);
+    el.dataset.lastY = String(y);
 
     const hit = tileHit(el);
     tiles.forEach(t=>t.classList.remove('hint'));
@@ -400,9 +414,9 @@ function makeDraggable(el){
         }
       }
     }
-    // 원위치
-    el.style.left = el.dataset.homeX+'px';
-    el.style.top  = el.dataset.homeY+'px';
+    /* ✅ 자유 배치: 오답이어도 현재 위치를 새 'home'으로 저장 (스냅백 없음) */
+    el.dataset.homeX = el.dataset.lastX;
+    el.dataset.homeY = el.dataset.lastY;
   };
 
   el.addEventListener('pointerdown', onDown);
@@ -458,9 +472,6 @@ $('#reloadBg').addEventListener('click', ()=>{
   setBoardBg(stageImages[currentStage]);
   toast('배경을 새로고침했어요');
 });
-
-/* 창 크기 변경 시 하트 재배치(겹침 방지) */
-window.addEventListener('resize', ()=> layoutHeartsNoOverlap(false));
 
 /* 초기 진입 */
 buildStage(1);
