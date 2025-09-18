@@ -18,48 +18,47 @@
   html,body{height:100%;margin:0;background:linear-gradient(135deg,#0ea5e9 0%,#f9a8d4 100%) fixed;font-family:"Jua",system-ui,"Noto Sans KR",sans-serif;color:#fff}
   .app{display:flex;flex-direction:column;height:100vh;gap:10px;padding:12px}
   header{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  header h1{font-size:clamp(18px,4.5vw,28px);margin:0 8px 0 0; text-shadow:0 3px 0 #0003}
+  header h1{font-size:clamp(20px,5.4vw,34px);margin:0 8px 0 0; text-shadow:0 3px 0 #0003}
   .stageButtons{display:flex;gap:8px;flex-wrap:wrap}
   .pill{
-    background:#00000028; border:1px solid #ffffff33; padding:8px 12px; border-radius:999px; font-weight:700; backdrop-filter:blur(6px)
+    background:#00000028; border:1px solid #ffffff33; padding:10px 14px; border-radius:999px; font-weight:900; backdrop-filter:blur(6px)
   }
   button{
-    background:var(--accent); color:#fff; border:none; padding:10px 16px; border-radius:14px;
+    background:var(--accent); color:#fff; border:none; padding:12px 18px; border-radius:16px;
     font-weight:900; box-shadow:0 8px 18px #0004; cursor:pointer; transform:translateZ(0);
     transition:transform .06s ease, filter .06s ease;
   }
   button:active{transform:translateY(2px) scale(.98); filter:brightness(.95)}
   button.secondary{background:#00000028; border:1px solid #ffffff35}
   .hud{margin-left:auto;display:flex;gap:8px;align-items:center}
-  .boardWrap{position:relative;flex:1;min-height:280px;border-radius:18px;overflow:hidden;background:#000;box-shadow:0 12px 30px #0005}
+  .boardWrap{position:relative;flex:1;min-height:300px;border-radius:18px;overflow:hidden;background:#000;box-shadow:0 12px 30px #0005}
   .boardBg{position:absolute; inset:0; background:#000 center/cover no-repeat; filter:saturate(1); transform:translateZ(0)}
   .tiles{position:absolute; inset:0;}
   .tile{
     position:absolute; display:flex; align-items:center; justify-content:center;
     background:var(--tile); color:var(--tileText);
     border:0; border-radius:14px; user-select:none; -webkit-user-select:none;
-    font-size:clamp(16px,3.6vw,34px); font-weight:900; letter-spacing:.2px;
-    /* 배경이 절대 새어보이지 않도록 살짝 겹치게 */
+    font-size:clamp(22px,4.8vw,42px); font-weight:900; letter-spacing:.2px;
     box-shadow:0 0 0 .6px #000 inset, 0 0 0 1px #000;
     transition:opacity .22s ease, transform .2s ease, filter .2s ease, background .2s ease;
   }
-  .tile small{opacity:.95; transform:translateY(-1px)}
+  .tile small{opacity:.98; transform:translateY(-1px)}
   .tile.hint{outline:3px dashed #fff8; outline-offset:-4px; animation:hint 1s infinite}
-  @keyframes hint{0%,100%{filter:none}50%{filter:brightness(1.3)}}
-  .tile.solved{opacity:0; pointer-events:none; transform:scale(.96)}
+  @keyframes hint{0%,100%{filter:none}50%{filter:brightness(1.25)}}
+  .tile.solved{opacity:0; pointer-events:none; transform:scale(.92); transition:opacity .28s ease, transform .28s ease}
 
   .tray{
-    position:relative; min-height:130px; border-radius:18px; background:#00000028;
+    position:relative; border-radius:18px; background:#00000028;
     border:1px solid #ffffff33; padding:12px; overflow:hidden; backdrop-filter:blur(8px);
     box-shadow:inset 0 0 0 1px #ffffff1a;
   }
-  .heartsArea{position:relative; min-height:100px}
+  .heartsArea{position:relative; min-height:120px}
   .heart{
-    position:absolute; width:170px; min-width:140px; padding:16px 18px 20px;
+    position:absolute; width:180px; min-width:150px; padding:16px 18px 20px;
     text-align:center; color:#fff; cursor:grab; touch-action:none;
     transform:translate(-50%,-50%); will-change:transform;
     filter:drop-shadow(0 10px 14px #0005);
-    transition:transform .12s ease, opacity .2s ease;
+    transition:transform .12s ease, opacity .2s ease, left .15s ease, top .15s ease;
     animation:float 3s ease-in-out infinite;
   }
   .heart.grabbing{cursor:grabbing; transform:translate(-50%,-50%) scale(1.06) rotate(-1.5deg)}
@@ -73,8 +72,8 @@
   .heart::after{left:auto; right:18%; transform:rotate(45deg)}
   .heart > span{
     position:relative; z-index:2; display:inline-block;
-    padding:10px 12px; border-radius:12px; background:#0007; box-shadow:0 3px 10px #0007;
-    font-size:clamp(18px,4.2vw,36px); font-weight:900; white-space:nowrap;
+    padding:12px 14px; border-radius:12px; background:#0007; box-shadow:0 3px 10px #0007;
+    font-size:clamp(22px,5vw,44px); font-weight:900; white-space:nowrap;
   }
   .heart.bad{animation:shake .28s}
   @keyframes shake{0%{transform:translate(-50%,-50%) rotate(0)}25%{transform:translate(calc(-50% - 7px),-50%) rotate(-3deg)}75%{transform:translate(calc(-50% + 7px),-50%) rotate(3deg)}100%{transform:translate(-50%,-50%) rotate(0)}}
@@ -86,7 +85,6 @@
   .lifeDot.off{background:#0002}
 
   .footerBar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:8px}
-  .progress{font-weight:900}
   .legend{opacity:.95}
   .toast{
     position:fixed; left:50%; bottom:16px; transform:translateX(-50%);
@@ -97,11 +95,11 @@
   @keyframes fade{from{opacity:0; transform:translateX(-50%) translateY(8px)} to{opacity:1; transform:translateX(-50%) translateY(0)}}
 
   /* 작은 반짝이 */
-  .spark{position:absolute; pointer-events:none; font-size:22px; animation:spark 800ms ease forwards}
+  .spark{position:absolute; pointer-events:none; font-size:24px; animation:spark 800ms ease forwards}
   @keyframes spark{0%{opacity:0; transform:translateY(10px) scale(.6)}30%{opacity:1}100%{opacity:0; transform:translateY(-30px) scale(1.2)}}
 
   @media (max-width:768px){
-    .heart{width:150px}
+    .heart{width:160px}
   }
 </style>
 </head>
@@ -141,67 +139,71 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* -------------------- 단계별 문제 세트 -------------------- */
+/* -------------------- 단계별 문제 세트 --------------------
+   - 1단계: 통분/약분 불필요(기본)
+   - 2·3단계: 덧셈은 '올림', 뺄셈은 '빌림'이 반드시 나오도록 구성
+   - 모든 분모는 통분이 필요 없도록 동일하게 제시
+------------------------------------------------------------ */
 const STAGES = {
   1: { rows:2, cols:4, // 8조각
        pairs: [
-        {q:"2/5 + 2/5", a:"4/5"},
-        {q:"5/6 + 3/6", a:"1 1/3"},
-        {q:"1 1/9 + 1 3/9", a:"2 4/9"},
-        {q:"3/5 - 1/5", a:"2/5"},
-        {q:"8 4/5 - 6 2/5", a:"2 2/5"},
-        {q:"2 - 5/9", a:"1 4/9"},
-        {q:"2/8 + 5/8", a:"7/8"},
-        {q:"7/9 + 3/9", a:"1 1/9"},
+        {q:"2/5 + 1/5", a:"3/5"},
+        {q:"7/9 + 1/9", a:"8/9"},
+        {q:"6/11 - 2/11", a:"4/11"},
+        {q:"3/7 + 3/7", a:"6/7"},
+        {q:"5/8 - 2/8", a:"3/8"},
+        {q:"1 2/9 + 2 3/9", a:"3 5/9"},
+        {q:"4 3/7 - 1 1/7", a:"3 2/7"},
+        {q:"2 5/12 + 1 2/12", a:"3 7/12"},
        ]
      },
-  2: { rows:4, cols:4, // 16조각
+  2: { rows:4, cols:4, // 16조각 — 올림/빌림 포함
        pairs: [
-        {q:"3 1/8 + 3 2/8", a:"6 3/8"},
-        {q:"6/7 - 4/7", a:"2/7"},
-        {q:"9 4/8 - 5 3/8", a:"4 1/8"},
-        {q:"9 - 3/4", a:"8 1/4"},
-        {q:"1/4 + 2/4", a:"3/4"},
-        {q:"5 5/7 + 3 4/7", a:"9 2/7"},
-        {q:"3/7 - 2/7", a:"1/7"},
-        {q:"3 6/8 - 1 5/8", a:"2 1/8"},
-        {q:"8 - 3/4", a:"7 1/4"},
-        {q:"1/9 + 6/9", a:"7/9"},
-        {q:"4/5 + 3/5", a:"1 2/5"},
-        {q:"7/10 + 1/10", a:"8/10"},
-        {q:"11/12 - 5/12", a:"6/12"},
-        {q:"2 3/8 + 1 1/8", a:"3 4/8"},
-        {q:"4/9 + 2/9", a:"6/9"},
-        {q:"2 5/6 - 1 1/6", a:"1 4/6"},
+        {q:"2 5/7 + 1 6/7", a:"4 4/7"},   // 올림
+        {q:"4 2/9 - 1 7/9", a:"2 4/9"},   // 빌림
+        {q:"1 8/11 + 2 6/11", a:"4 3/11"},// 올림
+        {q:"5 1/7 - 2 6/7", a:"2 2/7"},   // 빌림
+        {q:"3 7/11 + 1 5/11", a:"5 1/11"},// 올림
+        {q:"6 3/11 - 2 9/11", a:"3 5/11"},// 빌림
+        {q:"2 9/13 + 1 8/13", a:"4 4/13"},// 올림
+        {q:"7 2/13 - 3 9/13", a:"3 6/13"},// 빌림
+        {q:"1 9/17 + 3 12/17", a:"5 4/17"},// 올림
+        {q:"5 4/17 - 2 13/17", a:"2 8/17"},// 빌림
+        {q:"3 6/7 + 1 6/7", a:"5 5/7"},   // 올림
+        {q:"4 1/9 - 1 8/9", a:"2 2/9"},   // 빌림
+        {q:"2 8/9 + 1 5/9", a:"4 4/9"},   // 올림
+        {q:"3 3/11 - 1 9/11", a:"1 5/11"},// 빌림
+        {q:"1 7/13 + 2 12/13", a:"4 6/13"},// 올림
+        {q:"6 2/7 - 4 6/7", a:"1 3/7"},   // 빌림
        ]
      },
-  3: { rows:5, cols:5, // 25조각
+  3: { rows:5, cols:5, // 25조각 — 올림/빌림 포함
        pairs: [
-        {q:"2/3 + 1/3", a:"1"},
-        {q:"7/8 - 3/8", a:"4/8"},
-        {q:"5/9 + 2/9", a:"7/9"},
-        {q:"4/7 + 2/7", a:"6/7"},
-        {q:"6/11 + 3/11", a:"9/11"},
-        {q:"3 1/4 + 2 2/4", a:"5 3/4"},
-        {q:"4 3/5 - 2 1/5", a:"2 2/5"},
-        {q:"6 7/10 - 1 3/10", a:"5 4/10"},
-        {q:"2 4/9 + 1 2/9", a:"3 6/9"},
-        {q:"1/6 + 3/6", a:"4/6"},
-        {q:"5/6 - 3/6", a:"2/6"},
-        {q:"3/10 + 5/10", a:"8/10"},
-        {q:"9/10 - 2/10", a:"7/10"},
-        {q:"1 1/8 + 2 5/8", a:"3 6/8"},
-        {q:"4 7/8 - 2 1/8", a:"2 6/8"},
-        {q:"5/14 + 4/14", a:"9/14"},
-        {q:"9/8 - 3/8", a:"6/8"},
-        {q:"1 2/3 + 5/6", a:"2 3/6"},
-        {q:"3/8 + 2/8", a:"5/8"},
-        {q:"7/15 + 4/15", a:"11/15"},
-        {q:"7/18 + 6/18", a:"13/18"},
-        {q:"2 2/3 + 1 2/3", a:"4 1/3"},
-        {q:"2 1/3 + 2/3", a:"3"},
-        {q:"2 5/6 + 3 1/3", a:"6 1/6"},
-        {q:"1 1/2 + 1 3/8", a:"2 7/8"},
+        {q:"3 4/7 + 2 6/7", a:"6 3/7"},   // 올림
+        {q:"5 2/11 - 2 8/11", a:"2 5/11"},// 빌림
+        {q:"1 9/13 + 2 8/13", a:"4 4/13"},// 올림
+        {q:"4 1/7 - 1 5/7", a:"2 3/7"},   // 빌림
+        {q:"2 7/11 + 3 7/11", a:"6 3/11"},// 올림
+        {q:"6 3/13 - 2 11/13", a:"3 5/13"},// 빌림
+        {q:"1 3/5 + 2 4/5", a:"4 2/5"},   // 올림
+        {q:"7 4/9 - 4 8/9", a:"2 5/9"},   // 빌림
+        {q:"4 8/9 + 1 5/9", a:"6 4/9"},   // 올림
+        {q:"3 1/5 - 1 4/5", a:"1 2/5"},   // 빌림
+        {q:"2 5/7 + 1 6/7", a:"4 4/7"},   // 올림
+        {q:"5 3/11 - 3 9/11", a:"1 5/11"},// 빌림
+        {q:"3 9/17 + 1 11/17", a:"5 3/17"},// 올림
+        {q:"8 2/13 - 3 10/13", a:"4 5/13"},// 빌림
+        {q:"4 7/13 + 2 9/13", a:"7 3/13"},// 올림
+        {q:"6 1/7 - 3 6/7", a:"2 2/7"},   // 빌림
+        {q:"1 8/11 + 1 7/11", a:"3 4/11"},// 올림
+        {q:"5 1/13 - 2 9/13", a:"2 5/13"},// 빌림
+        {q:"2 4/5 + 3 4/5", a:"6 3/5"},   // 올림
+        {q:"9 3/17 - 4 12/17", a:"4 8/17"},// 빌림
+        {q:"5 6/7 + 2 5/7", a:"8 4/7"},   // 올림
+        {q:"7 2/11 - 5 9/11", a:"1 4/11"},// 빌림
+        {q:"3 8/13 + 1 9/13", a:"5 4/13"},// 올림
+        {q:"4 2/5 - 2 4/5", a:"1 3/5"},   // 빌림
+        {q:"2 9/11 + 1 7/11", a:"4 5/11"},// 올림
        ]
      }
 };
@@ -236,6 +238,33 @@ function sparkAt(x,y,text='✨'){
   setTimeout(()=>s.remove(), 820);
 }
 
+/* 하트 겹침 방지 레이아웃 (반응형 그리드) */
+function layoutHeartsNoOverlap(jitter=true){
+  const area = $('#heartsArea');
+  const rect = area.getBoundingClientRect();
+  const W = rect.width || area.clientWidth || 600;
+
+  const cellW = 190;           // 하트 폭 + 여백 기준
+  const cellH = 130;           // 하트 높이 + 여백 기준
+  const cols = Math.max(1, Math.floor(W / cellW));
+  const rows = Math.ceil(hearts.length / cols);
+
+  // 트레이 높이를 자동 확장
+  area.style.minHeight = Math.max(120, rows * cellH + 20) + 'px';
+
+  hearts.forEach((h, idx)=>{
+    const col = idx % cols;
+    const row = Math.floor(idx / cols);
+    const jx = jitter ? (Math.random()*16 - 8) : 0;
+    const jy = jitter ? (Math.random()*10 - 5) : 0;
+    const x = Math.round(col*cellW + cellW/2 + jx);
+    const y = Math.round(row*cellH + cellH/2 + jy);
+    h.style.left = x+'px';
+    h.style.top  = y+'px';
+    h.dataset.homeX = x; h.dataset.homeY = y;
+  });
+}
+
 /* -------------------- 스테이지 빌드 -------------------- */
 function setBoardBg(url){
   $('#boardBg').style.backgroundImage = url ? `url(${url})` : 'none';
@@ -245,7 +274,6 @@ function buildStage(stageId){
   const stage = STAGES[stageId];
   const pairs = stage.pairs.slice();
   solvedCount = 0;
-  $('#progress').textContent = `완료 ${solvedCount}/${Math.min(stage.rows*stage.cols, pairs.length)}`;
 
   // 배경 적용 (타일 아래, 처음엔 전부 가려짐)
   setBoardBg(stageImages[stageId] || '');
@@ -255,11 +283,13 @@ function buildStage(stageId){
   $('#heartsArea').innerHTML = '';
   hearts = []; tiles = [];
 
-  // 퍼즐 타일 생성 (그리드 전부 가려 퍼즐 시작 시 그림이 전혀 안 보임)
+  // 퍼즐 타일 생성 — 시작 시 그림 완전 가림
   const r = stage.rows, c = stage.cols;
   const total = r*c;
   const useN = Math.min(total, pairs.length);
   const picked = pairs.slice(0, useN);
+
+  $('#progress').textContent = `완료 ${solvedCount}/${useN}`;
 
   const tilesEl = $('#tiles');
   for(let i=0;i<useN;i++){
@@ -270,7 +300,6 @@ function buildStage(stageId){
     tile.dataset.answer = picked[i].a;
     tile.innerHTML = `<small>${picked[i].a}</small>`;
 
-    // 정확히 덮도록 % 배치 (틈 방지 위해 음수 margin 없이 100% 꽉 채움)
     const w = 100/c, h = 100/r;
     tile.style.left = `${col*w}%`;
     tile.style.top  = `${row*h}%`;
@@ -281,11 +310,8 @@ function buildStage(stageId){
     tiles.push(tile);
   }
 
-  // 하트(문제) 생성 — 랜덤 배치
+  // 하트(문제) 생성
   const heartsArea = $('#heartsArea');
-  const areaRect = heartsArea.getBoundingClientRect();
-  const cx = areaRect.width  || heartsArea.clientWidth;
-  const cy = areaRect.height || heartsArea.clientHeight;
 
   shuffle(picked).forEach((p)=>{
     const heart = document.createElement('div');
@@ -299,16 +325,13 @@ function buildStage(stageId){
     lives.innerHTML = `<div class="lifeDot"></div><div class="lifeDot"></div><div class="lifeDot"></div>`;
     heart.appendChild(lives);
 
-    // 랜덤 시작 위치
-    const x = (30 + Math.random()*(cx-60))|0;
-    const y = (30 + Math.random()*(cy-60))|0;
-    heart.style.left = x+'px';
-    heart.style.top  = y+'px';
-    heart.dataset.homeX = x; heart.dataset.homeY = y;
     heartsArea.appendChild(heart);
     makeDraggable(heart);
     hearts.push(heart);
   });
+
+  // 첫 배치: 겹침 없이
+  layoutHeartsNoOverlap(false);
 
   toast(`${stageId}단계 시작! 조각 ${useN}개`);
 }
@@ -345,17 +368,14 @@ function makeDraggable(el){
     tiles.forEach(t=>t.classList.remove('hint'));
 
     if(hit){
-      // 정답?
       const ok = (hit.dataset.answer.trim() === el.dataset.answer.trim());
       if(ok){
-        // 퍼즐 조각 제거 + 스파크
         const r = hit.getBoundingClientRect();
         hit.classList.add('solved');
         sparkAt(r.left + r.width/2, r.top + r.height/2, '💖');
 
         el.remove(); // 하트 제거
         solvedCount++; $('#progress').textContent = `완료 ${solvedCount}/${tiles.length}`;
-        // 남은 타일이 더 귀엽게 반짝
         tiles.forEach(t=>!t.classList.contains('solved') && (t.style.background = '#2a2a2a'));
 
         if(solvedCount===tiles.length){
@@ -407,10 +427,10 @@ function tileHit(heartEl){
 /* 축하 이펙트 간단 버스트 */
 function celebratoryBurst(){
   const rect = $('#boardWrap').getBoundingClientRect();
-  for(let i=0;i<24;i++){
+  for(let i=0;i<28;i++){
     const x = rect.left + Math.random()*rect.width;
     const y = rect.top + rect.height*0.3 + Math.random()*rect.height*0.4;
-    setTimeout(()=>sparkAt(x,y, Math.random()<.5?'✨':'💫'), Math.random()*500);
+    setTimeout(()=>sparkAt(x,y, Math.random()<.5?'✨':'💫'), Math.random()*520);
   }
 }
 
@@ -421,22 +441,15 @@ $('.stageButtons').addEventListener('click', (e)=>{
 });
 
 $('#shuffleBtn').addEventListener('click', ()=>{
-  const area = $('#heartsArea');
-  const rect = area.getBoundingClientRect(); const cx = rect.width; const cy = rect.height;
-  hearts.forEach(h=>{
-    const x = (30 + Math.random()*(cx-60))|0;
-    const y = (30 + Math.random()*(cy-60))|0;
-    h.style.left = x+'px'; h.style.top = y+'px';
-    h.dataset.homeX = x; h.dataset.homeY = y;
-  });
+  shuffle(hearts);
+  layoutHeartsNoOverlap(true); // 겹침 없이 재배치 + 약간의 지터
   toast('하트를 섞었어요');
 });
 
 $('#resetBtn').addEventListener('click', ()=> buildStage(currentStage));
 
-/* 자산 폴더 새로고침(파일 교체 후 새로고침 없이 다시 로드하고 싶을 때) */
+/* 자산 폴더 새로고침(파일 교체 후 캐시 무시) */
 $('#reloadBg').addEventListener('click', ()=>{
-  // cache busting 쿼리 붙여서 새로고침 효과
   const t = Date.now();
   Object.keys(stageImages).forEach(k=>{
     const base = stageImages[k].split('?')[0];
@@ -446,9 +459,11 @@ $('#reloadBg').addEventListener('click', ()=>{
   toast('배경을 새로고침했어요');
 });
 
+/* 창 크기 변경 시 하트 재배치(겹침 방지) */
+window.addEventListener('resize', ()=> layoutHeartsNoOverlap(false));
+
 /* 초기 진입 */
 buildStage(1);
 </script>
 </body>
 </html>
-
